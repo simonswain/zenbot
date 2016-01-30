@@ -13,7 +13,7 @@ module.exports = {
     }, {
       "slug": "random_value",
       "title": "Random Value",
-      "schema": "value",
+      "schema": "float",
       "panel": "chart",
       "hook": "random_value",
       "interval": 5000
