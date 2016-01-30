@@ -1,0 +1,26 @@
+{
+  "name": "zenbot",
+  "description": "ZenBot - Node client for Zentri Cloud",
+  "version": "0.0.1",
+  "homepage": "github.com/simonswain/zenbot",
+  "author": {
+    "name": "Simon Swain",
+    "email": "simon@simonswain.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "main": "lib/index.js",
+  "engines": {
+    "node": ">= 4.0.0"
+  },
+  "dependencies": {
+    "async": "^1.5.2",
+    "lodash": "^4.1.0",
+    "moment": "^2.11.1",
+    "request": "^2.69.0",
+    "request-json": "^0.5.5",
+    "ws": "^1.0.1"
+  }
+}
