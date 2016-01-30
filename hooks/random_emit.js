@@ -21,7 +21,7 @@ var handler;
 
 var emit = function(){
 
-  var value = (Math.random() * 100).toFixed(2);
+  var value = Number((Math.random() * 100).toFixed(2));
 
   var message = {
     at: new Date().getTime(),
