@@ -247,7 +247,7 @@ var startReporting = (next) => {
     fn.caller = () => {
       getHook(fn, () => {
         setTimeout(fn.caller, fn.interval);
-      })
+      });
     };
 
     fn.caller();
@@ -268,4 +268,4 @@ async.series([
   startReporting
 ], (err) => {
   console.log('running.');
-})
+});
