@@ -64,13 +64,13 @@ var makeStreams = (next) => {
       fn.opts = {};
     }
 
-    if(_.find(device.streams, {slug: fn.slug})){
-      console.log('*', fn.schema, '/' + fn.slug, '"' + fn.title + '"');
+    if(_.find(device.streams, {slug: fn.stream})){
+      console.log('*', fn.schema, '/' + fn.stream, '"' + fn.title + '"');
       return cb();
     }
 
     let stream = {
-      slug: fn.slug,
+      slug: fn.stream,
       title: fn.title,
       schema: fn.schema,
       panel: fn.panel
@@ -79,7 +79,7 @@ var makeStreams = (next) => {
     softDevice.addStream(
       stream,
       (err, res) => {
-        console.log('+', fn.schema, '/' + fn.slug, '"' + fn.title + '"');
+        console.log('+', fn.schema, '/' + fn.stream, '"' + fn.title + '"');
         cb();
       });
   }, next);
@@ -127,12 +127,12 @@ var initHook = (fn, done) => {
 var onHook = (fn, message) => {
 
   if(message.hasOwnProperty('value')){
-    console.log('hook emit', fn.hook,  '>', fn.slug, message.value);
+    console.log('hook emit', fn.hook,  '>', fn.stream, message.value);
   } else {
-    console.log('hook emit', fn.hook,  '>', fn.slug);
+    console.log('hook emit', fn.hook,  '>', fn.stream);
   }
 
-  softDevice.addMessage(fn.slug, message, () => {});
+  softDevice.addMessage(fn.stream, message, () => {});
 
 };
 
@@ -142,20 +142,20 @@ var getHook = (fn, done) => {
     done = () => {};
   }
 
-  console.log('calling hook', fn.hook,  '>', fn.slug);
+  console.log('calling hook', fn.hook,  '>', fn.stream);
   hooks[fn.hook].get(fn.opts, (err, message) => {
     if(err){
-      console.log('hook get failed', fn.hook,  '>', fn.slug, err);
+      console.log('hook get failed', fn.hook,  '>', fn.stream, err);
       return done();
     }
 
     if(message.hasOwnProperty('value')){
-      console.log('hook get', fn.hook,  '>', fn.slug, message.value);
+      console.log('hook get', fn.hook,  '>', fn.stream, message.value);
     } else {
-      console.log('hook get', fn.hook,  '>', fn.slug);
+      console.log('hook get', fn.hook,  '>', fn.stream);
     }
 
-    softDevice.addMessage(fn.slug, message, () => {
+    softDevice.addMessage(fn.stream, message, () => {
       done();
     });
 
@@ -175,19 +175,19 @@ var putHook = (fn, message, done) => {
   }
 
   if(message.hasOwnProperty('value')){
-    console.log('hook put', fn.hook,  '>', fn.slug, message.value);
+    console.log('hook put', fn.hook,  '>', fn.stream, message.value);
   } else {
-    console.log('hook put', fn.hook,  '>', fn.slug);
+    console.log('hook put', fn.hook,  '>', fn.stream);
   }
 
   hooks[fn.hook].put(fn.opts, message, (err, message) => {
 
     if(err){
-      console.log('hook put failed', fn.hook,  '>', fn.slug, err);
+      console.log('hook put failed', fn.hook,  '>', fn.stream, err);
       return done();
     }
 
-    console.log('putHook DONE', fn.hook,  '>', fn.slug);
+    console.log('putHook DONE', fn.hook,  '>', fn.stream);
     done();
 
   });
@@ -205,18 +205,18 @@ var initHooks = (next) => {
 var onMessage = (msg) => {
 
   if(msg.action === 'stream:message'){
-    var fn = _.find(functions, {slug: msg.stream});
+    var fn = _.find(functions, {stream: msg.stream});
     if(!fn){
       console.log('ws message: not found', JSON.stringify(msg));
       return;
     }
 
-    console.log('ws from cloud >', 'streams/' + fn.slug, JSON.stringify(msg.message));
+    console.log('ws from cloud >', 'streams/' + fn.stream, JSON.stringify(msg.message));
 
     // is it a command we have to process here? this overrides getHook
     if(fn.schema === 'command' && fn.hasOwnProperty('execute')) {
-      var target = _.find(functions, {slug: stream.execute});
-      console.log('execute', fn.slug, '>', fn.execute);
+      var target = _.find(functions, {stream: stream.execute});
+      console.log('execute', fn.stream, '>', fn.execute);
       return getHook(target);
     }
 

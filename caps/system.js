@@ -5,7 +5,7 @@ module.exports = {
   },
   "functions": [
     {
-      "slug": "cpu_temp",
+      "stream": "cpu_temp",
       "title": "CPU Temperature",
       "schema": "float",
       "panel": "chart",

@@ -5,13 +5,13 @@ module.exports = {
   },
   "functions": [
     {
-      "slug": "status_led",
+      "stream": "status_led",
       "title": "Status LED",
       "schema": "control",
       "panel": "zeroonetwo",
       "hook": "set_value"
     }, {
-      "slug": "random_value",
+      "stream": "random_value",
       "title": "Random Value",
       "schema": "float",
       "panel": "chart",
