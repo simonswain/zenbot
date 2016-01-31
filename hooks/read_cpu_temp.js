@@ -8,7 +8,7 @@ var get = function(opts, done){
   cmd = 'cat /sys/class/thermal/thermal_zone0/temp';
   exec(cmd, function(error, stdout, stderr){
 
-    console.log('read cpu temp', stdout);
+    //console.log('read cpu temp', stdout);
 
     var temp = Number(stdout);
     if(isNaN(temp)){
