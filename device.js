@@ -71,7 +71,7 @@ Device.prototype.socketWatchdog = function(){
   if(this.ws.readyState === 3){
     console.log('*** WATCHDOG RECONNECT');
     this.socketConnect();
-  } 
+  }
   this.watchdogTimer = setTimeout(this.socketWatchdog.bind(this), this.opts.watchdogPeriod);
 };
 
@@ -100,11 +100,11 @@ Device.prototype.onSocketMessage = function(msg, flags) {
   }
 
   // deal with specific message types here
-  
+
   if(msg.hasOwnProperty('action')){
 
     // fire callback here
-    
+
     // if (msg.action === 'stream:message') {
     //   console.log('from ws >', msg.stream, msg.message);
     // } else {
@@ -117,7 +117,7 @@ Device.prototype.onSocketMessage = function(msg, flags) {
 
 Device.prototype.quit = function(done) {
   this.disconnect();
-  return done(); 
+  return done();
 };
 
 // methods
@@ -138,7 +138,7 @@ Device.prototype.get = function(done){
     }
     done(err, body);
   });
-  
+
 };
 
 Device.prototype.addStream = function(attrs, done){
@@ -158,15 +158,17 @@ Device.prototype.addStream = function(attrs, done){
     }
     done(err, body);
   });
-  
+
 };
 
 Device.prototype.addMessage = function(slug, message, done){
 
+  var url = this.opts.rest + '/streams/' + slug + '/messages';
+
   request({
     method: 'POST',
     json: true,
-    url: this.opts.rest + '/streams/' + slug + '/messages',
+    url: url,
     headers: {
       'Authorization': 'Bearer ' + this.opts.token
     },
@@ -181,14 +183,14 @@ Device.prototype.addMessage = function(slug, message, done){
     }
     done(err, body);
   });
-  
+
 };
 
 
 function create(opts){
   var device = new Device(opts);
   return device;
-} 
+}
 
 var virtualDevice = function(opts){
 

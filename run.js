@@ -28,6 +28,11 @@ if(process.argv.length === 3){
   process.exit();
 }
 
+if(config.cloud){
+  console.log('Cloud REST', config.cloud.rest);
+  console.log('Cloud WS  ', config.cloud.ws);
+}
+
 var functions = _.clone(config.functions);
 
 var createSoftDevice = (next) => {
@@ -41,9 +46,14 @@ var createSoftDevice = (next) => {
 
 var getDevice = (next) => {
   softDevice.get((err, res) => {
+    if(!res){
+      console.log('Token not on cloud. Create a new Device on the cloud to get a token.');
+      process.exit();
+    }
     device = res;
-    console.log(device.title);
-    console.log(device.code);
+    console.log('device', device.title);
+    console.log('code  ', device.code);
+    console.log('owner ', device.user);
     next();
   });
 };
@@ -193,13 +203,15 @@ var initHooks = (next) => {
 };
 
 var onMessage = (msg) => {
+
   if(msg.action === 'stream:message'){
     var fn = _.find(functions, {slug: msg.stream});
     if(!fn){
       console.log('ws message: not found', JSON.stringify(msg));
       return;
     }
-    console.log('cloud >', 'streams/' + fn.slug, JSON.stringify(msg.message));
+
+    console.log('ws from cloud >', 'streams/' + fn.slug, JSON.stringify(msg.message));
 
     // is it a command we have to process here? this overrides getHook
     if(fn.schema === 'command' && fn.hasOwnProperty('execute')) {
