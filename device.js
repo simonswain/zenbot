@@ -165,6 +165,17 @@ Device.prototype.addMessage = function(slug, message, done){
 
   var url = this.opts.rest + '/streams/' + slug + '/messages';
 
+  if(this.ws){
+    let msg = {
+      action: 'stream:message',
+      stream: slug,
+      message: message
+    };
+    console.log('ws to cloud   <', JSON.stringify(msg));
+    this.ws.send(JSON.stringify(msg));
+    return done();
+  }
+
   request({
     method: 'POST',
     json: true,

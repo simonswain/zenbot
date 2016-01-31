@@ -63,7 +63,6 @@ var makeStreams = (next) => {
     if(!fn.hasOwnProperty('opts')){
       fn.opts = {};
     }
-
     if(_.find(device.streams, {slug: fn.stream})){
       console.log('*', fn.schema, '/' + fn.stream, '"' + fn.title + '"');
       return cb();
@@ -264,8 +263,8 @@ async.series([
   //setAvatarIfNone,
   makeStreams,
   initHooks,
-  connectDevice,
-  startReporting
+  connectDevice
 ], (err) => {
   console.log('running.');
+  startReporting(()=>{});
 });
