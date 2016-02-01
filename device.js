@@ -132,6 +132,10 @@ Device.prototype.get = function(done){
       'Authorization': 'Bearer ' + this.opts.token
     }
   }, function (err, res, body) {
+    if(err) {
+      console.log(err.message);
+      process.exit(0);
+    }
     if(res.statusCode !== 200) {
       console.log(err, body);
       return done(new Error('not found'));
@@ -165,6 +169,7 @@ Device.prototype.addMessage = function(slug, message, done){
 
   var url = this.opts.rest + '/streams/' + slug + '/messages';
 
+  var success = true;
   if(this.ws){
     let msg = {
       action: 'stream:message',
@@ -172,8 +177,16 @@ Device.prototype.addMessage = function(slug, message, done){
       message: message
     };
     console.log('ws to cloud   <', JSON.stringify(msg));
-    this.ws.send(JSON.stringify(msg));
-    return done();
+    try{
+      this.ws.send(JSON.stringify(msg));
+    } catch(e){
+      // if error then try rest
+      success = false;
+      console.log('socket', e.message);
+    }
+    if(success){
+      return done();
+    }
   }
 
   request({
@@ -185,6 +198,10 @@ Device.prototype.addMessage = function(slug, message, done){
     },
     body: message,
   }, function (err, res, body) {
+    if(err){
+      console.log(err.message);
+      return done(err);
+    }
     if(!res){
       return done(new Error('server not available'));
     }
