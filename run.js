@@ -24,7 +24,7 @@ if(process.argv.length === 3){
   }
   token = process.argv[3];
 } else {
-  console.log('Usage: ' + process.argv[1] + ' <token>');
+  console.log('Usage: ' + process.argv[1] + '[caps] <token>');
   process.exit();
 }
 
