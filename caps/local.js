@@ -6,28 +6,18 @@ module.exports = {
   "functions": [{
     "stream": "status_led",
     "title": "Status LED",
-    "schema": "control",
-    "panel": "zeroonetwo",
+    "schema": "boolean",
+    "panel": "toggle",
     "hook": "set_value"
   },
   {
     "stream": "key_press",
     "title": "Key Press",
-    "schema": "message",
-    "panel": "message",
-    "hook": "key_press",
-    "opts": {
-      "key": "1"
-    }
-  },
-  {
-    "stream": "keypress_toggle",
-    "title": "Key Press Toggle",
     "schema": "boolean",
-    "panel": "boolean",
+    "panel": "toggle",
     "hook": "key_toggle",
     "opts": {
-      "key": "2"
+      "key": ' '
     }
   }]
 };
