@@ -12,8 +12,13 @@ var init = function(opts, done) {
     output: process.stdout
   });
 
+  if(!opts.key){
+    opts.key = ' ';
+  }
+
   rl.input.on('keypress', function(ch, key) {
-    if (ch === '2') {
+
+    if (ch === opts.key) {
       var message = {
         at: new Date().getTime(),
         value: state ? 0 : 1

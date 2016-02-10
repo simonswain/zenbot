@@ -10,12 +10,16 @@ var init = function(opts, done) {
     output: process.stdout
   });
 
+  if(!opts.key){
+    opts.key = ' ';
+  }
+
   rl.input.on('keypress', function(ch, key) {
 
-    if (ch === '1') {
+    if (ch === opts.key) {
       var message = {
         at: new Date().getTime(),
-        value: ch
+        value: Math.floor(new Date().getTime() / 1000)
       };
 
       handler(message);
