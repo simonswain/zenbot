@@ -2,11 +2,12 @@
 
 var async = require('async');
 var _ = require('lodash');
+var fs = require('fs');
 var request = require('request');
 var Ws = require('ws');
 
 
-function Device(opts){
+function Device(opts) {
   this.opts = {
     rest: opts.rest,
     ws: opts.ws,
@@ -30,29 +31,29 @@ Device.prototype.disconnect = function(done) {
   return done();
 };
 
-Device.prototype.startWatchdog = function(){
+Device.prototype.startWatchdog = function() {
   this.socketWatchdog();
 };
 
-Device.prototype.stopWatchdog = function(){
-  if(this.watchdogTimer){
+Device.prototype.stopWatchdog = function() {
+  if (this.watchdogTimer) {
     clearTimeout(this.watchdogTimer);
   }
 };
 
-Device.prototype.onSocketOpen = function(){
+Device.prototype.onSocketOpen = function() {
   var msg = {
     auth: this.opts.token,
   };
   this.ws.send(JSON.stringify(msg));
 };
 
-Device.prototype.onSocketError = function(err){
+Device.prototype.onSocketError = function(err) {
   console.log('Socket Error', err.message);
 };
 
 
-Device.prototype.socketConnect = function(){
+Device.prototype.socketConnect = function() {
   this.ws = new Ws(this.opts.ws);
   this.ws.on('open', this.onSocketOpen.bind(this));
   this.ws.on('message', this.onSocketMessage.bind(this));
@@ -60,24 +61,24 @@ Device.prototype.socketConnect = function(){
   this.socketWatchdog();
 };
 
-Device.prototype.socketWatchdog = function(){
+Device.prototype.socketWatchdog = function() {
   //console.log('watchdog');
   this.stopWatchdog();
-  if(!this.ws){
+  if (!this.ws) {
     this.socketconnect();
     return;
   }
   // WebSocket.CLOSED === 3
-  if(this.ws.readyState === 3){
+  if (this.ws.readyState === 3) {
     console.log('*** WATCHDOG RECONNECT');
     this.socketConnect();
   }
   this.watchdogTimer = setTimeout(this.socketWatchdog.bind(this), this.opts.watchdogPeriod);
 };
 
-Device.prototype.onSocketAuth = function(msg){
-  if(this.connectCallback){
-    if(msg.auth === 'ok'){
+Device.prototype.onSocketAuth = function(msg) {
+  if (this.connectCallback) {
+    if (msg.auth === 'ok') {
       this.connectCallback();
     } else {
       this.connectCallback(new Error(msg.result));
@@ -90,18 +91,18 @@ Device.prototype.onSocketMessage = function(msg, flags) {
   msg = JSON.parse(msg);
   //console.log('ws > device', JSON.stringify(msg));
 
-  if(msg.hasOwnProperty('auth')){
+  if (msg.hasOwnProperty('auth')) {
     this.onSocketAuth(msg);
     return;
   }
 
-  if(typeof this.rawMessageHandler === 'function'){
+  if (typeof this.rawMessageHandler === 'function') {
     this.rawMessageHandler(msg);
   }
 
   // deal with specific message types here
 
-  if(msg.hasOwnProperty('action')){
+  if (msg.hasOwnProperty('action')) {
 
     // fire callback here
 
@@ -122,7 +123,7 @@ Device.prototype.quit = function(done) {
 
 // methods
 
-Device.prototype.get = function(done){
+Device.prototype.get = function(done) {
 
   request({
     method: 'GET',
@@ -131,12 +132,12 @@ Device.prototype.get = function(done){
     headers: {
       'Authorization': 'Bearer ' + this.opts.token
     }
-  }, function (err, res, body) {
-    if(err) {
+  }, function(err, res, body) {
+    if (err) {
       console.log(err.message);
       process.exit(0);
     }
-    if(res.statusCode !== 200) {
+    if (res.statusCode !== 200) {
       console.log(err, body);
       return done(new Error('not found'));
     }
@@ -145,7 +146,7 @@ Device.prototype.get = function(done){
 
 };
 
-Device.prototype.addStream = function(attrs, done){
+Device.prototype.addStream = function(attrs, done) {
 
   request({
     method: 'POST',
@@ -155,8 +156,8 @@ Device.prototype.addStream = function(attrs, done){
       'Authorization': 'Bearer ' + this.opts.token
     },
     body: attrs,
-  }, function (err, res, body) {
-    if(res.statusCode !== 200) {
+  }, function(err, res, body) {
+    if (res.statusCode !== 200) {
       console.log('REST Err', err, body);
       return done(new Error('not found'));
     }
@@ -165,26 +166,26 @@ Device.prototype.addStream = function(attrs, done){
 
 };
 
-Device.prototype.addMessage = function(slug, message, done){
+Device.prototype.addMessage = function(slug, message, done) {
 
   var url = this.opts.rest + '/streams/' + slug + '/messages';
 
   var success = true;
-  if(this.ws){
+  if (this.ws) {
     let msg = {
       action: 'stream:message',
       stream: slug,
       message: message
     };
     console.log('ws to cloud   <', JSON.stringify(msg));
-    try{
+    try {
       this.ws.send(JSON.stringify(msg));
-    } catch(e){
+    } catch (e) {
       // if error then try rest
       success = false;
       console.log('socket', e.message);
     }
-    if(success){
+    if (success) {
       return done();
     }
   }
@@ -197,15 +198,15 @@ Device.prototype.addMessage = function(slug, message, done){
       'Authorization': 'Bearer ' + this.opts.token
     },
     body: message,
-  }, function (err, res, body) {
-    if(err){
+  }, function(err, res, body) {
+    if (err) {
       console.log(err.message);
       return done(err);
     }
-    if(!res){
+    if (!res) {
       return done(new Error('server not available'));
     }
-    if(res.statusCode !== 200) {
+    if (res.statusCode !== 200) {
       console.log(err, body);
       return done(new Error('not found'));
     }
@@ -214,20 +215,126 @@ Device.prototype.addMessage = function(slug, message, done){
 
 };
 
+Device.prototype.putFile = function(file, done) {
 
-function create(opts){
+  if (file.path.substr(0, 1) === '/') {
+    file.path = file.path.substr(1);
+  }
+
+  var url = this.opts.rest + '/files/' + file.path;
+
+  if (!file.mime) {
+    file.mime = 'application/octet-stream';
+  }
+
+  request({
+    method: 'POST',
+    json: true,
+    url: url,
+    headers: {
+      'Authorization': 'Bearer ' + this.opts.token
+    },
+    body: {
+      mime: file.mime,
+      base64: file.data.toString('base64')
+    },
+  }, function(err, res, body) {
+    if (res.statusCode !== 200) {
+      console.log('file upload error', err, body);
+      return done(err);
+    }
+    done(err, body);
+  });
+};
+
+Device.prototype.indexFiles = function(done) {
+
+  var url = this.opts.rest + '/files';
+
+  request({
+    method: 'GET',
+    json: true,
+    url: url,
+    headers: {
+      'Authorization': 'Bearer ' + this.opts.token
+    }
+  }, function(err, res, body) {
+    if (res.statusCode !== 200) {
+      console.log('file index error', err, body);
+      return done(err);
+    }
+    done(err, body);
+  });
+};
+
+Device.prototype.getFile = function(path, done) {
+
+  if (path.substr(0, 1) === '/') {
+    path = path.substr(1);
+  }
+
+  var url = this.opts.rest + '/files/' + path;
+
+  request({
+    method: 'GET',
+    json: true,
+    url: url,
+    headers: {
+      'Authorization': 'Bearer ' + this.opts.token
+    }
+  }, function(err, res, body) {
+    if (res.statusCode !== 200) {
+      console.log('file get error', err, body);
+      return done(err);
+    }
+
+    var file = {
+      data: new Buffer(body, 'base64'),
+      mime: res.headers['binary-mime']
+    };
+
+    done(err, file);
+  });
+};
+
+Device.prototype.delFile = function(path, done) {
+
+  if (path.substr(0, 1) === '/') {
+    path = path.substr(1);
+  }
+
+  var url = this.opts.rest + '/files/' + path;
+
+  request({
+    method: 'DELETE',
+    json: true,
+    url: url,
+    headers: {
+      'Authorization': 'Bearer ' + this.opts.token
+    }
+  }, function(err, res, body) {
+    if (res.statusCode !== 200) {
+      console.log('file del error', err, body);
+      return done(err);
+    }
+
+    done(err);
+  });
+};
+
+function create(opts) {
   var device = new Device(opts);
   return device;
 }
 
-var virtualDevice = function(opts){
+var virtualDevice = function(opts) {
 
   var device = null;
 
   var api = {};
 
 
-  api.addStream = function(stream, done){
+  api.addStream = function(stream, done) {
     request({
       method: 'POST',
       url: opts.host + '/api/device/streams',
@@ -236,12 +343,12 @@ var virtualDevice = function(opts){
         'Authorization': 'Bearer ' + opts.device_api_key
       },
       body: stream
-    }, function (err, res, body) {
+    }, function(err, res, body) {
       done(err, body);
     });
   };
 
-  api.addMessage = function(stream_id, message, done){
+  api.addMessage = function(stream_id, message, done) {
     request({
       method: 'POST',
       url: opts.host + '/api/device/streams/' + stream_id + '/messages',
@@ -250,30 +357,34 @@ var virtualDevice = function(opts){
         'Authorization': 'Bearer ' + opts.device_api_key
       },
       body: message
-    }, function (err, res) {
+    }, function(err, res) {
       done(err);
     });
   };
 
-  var getDevice = function(next){
-    api.getDevice(function(err, res){
+  var getDevice = function(next) {
+    api.getDevice(function(err, res) {
       device = res;
       next(err);
     });
   };
 
-  var makeStreams = function(next){
+  var makeStreams = function(next) {
     console.log('streams:');
-    async.eachSeries(opts.streams, function(x, cb){
+    async.eachSeries(opts.streams, function(x, cb) {
       var stream = x.stream;
-      if(_.findWhere(device.streams, {slug: stream.slug})){
+      if (_.findWhere(device.streams, {
+          slug: stream.slug
+        })) {
         console.log(' *', stream.schema, '/' + stream.slug, '"' + stream.title + '"');
-        x.stream = _.findWhere(device.streams, {slug: stream.slug});
+        x.stream = _.findWhere(device.streams, {
+          slug: stream.slug
+        });
         x.stream_id = x.stream.id;
         x.slug = x.stream.slug;
         return cb();
       }
-      api.addStream(stream, function(err, res){
+      api.addStream(stream, function(err, res) {
         console.log(' +', stream.schema, '/' + stream.slug, '"' + stream.title + '"');
         x.stream = res;
         x.stream_id = res.id;
@@ -284,48 +395,48 @@ var virtualDevice = function(opts){
   };
 
 
-  var initHooks = function(next){
-    async.eachSeries(opts.streams, function(stream, cb){
+  var initHooks = function(next) {
+    async.eachSeries(opts.streams, function(stream, cb) {
       initHook(stream, cb);
     }, next);
   };
 
 
-  var initHook = function(stream, done){
+  var initHook = function(stream, done) {
 
-    if(!done){
-      done = function(){};
+    if (!done) {
+      done = function() {};
     }
 
     // no init method
-    if(!stream.hook){
+    if (!stream.hook) {
       return done();
     }
 
-    if(!hooks.hasOwnProperty(stream.hook)){
+    if (!hooks.hasOwnProperty(stream.hook)) {
       console.log('hook', stream.hook, 'not available');
       return done();
     }
 
-    if(!hooks[stream.hook].hasOwnProperty('init')){
+    if (!hooks[stream.hook].hasOwnProperty('init')) {
       return done();
     }
 
-    if(!stream.hasOwnProperty('opts')){
+    if (!stream.hasOwnProperty('opts')) {
       stream.opts = {};
     }
 
     // bind to hook emitter if it exists
-    if(hooks[stream.hook].hasOwnProperty('listen')){
+    if (hooks[stream.hook].hasOwnProperty('listen')) {
       console.log('hook bind', stream.hook);
-      hooks[stream.hook].listen(function(message){
+      hooks[stream.hook].listen(function(message) {
         onHook(stream, message);
       });
     };
 
     // initialize hook
-    hooks[stream.hook].init(stream.opts, function(err, message){
-      if(err){
+    hooks[stream.hook].init(stream.opts, function(err, message) {
+      if (err) {
         console.log('hook init failed', stream.hook, err);
         return done();
       }
@@ -335,46 +446,46 @@ var virtualDevice = function(opts){
 
   };
 
-  var onHook = function(stream, message){
+  var onHook = function(stream, message) {
 
-    if(!stream.hasOwnProperty('opts')){
+    if (!stream.hasOwnProperty('opts')) {
       stream.opts = {};
     }
 
-    if(message.hasOwnProperty('value')){
-      console.log('hook emit', stream.hook,  '>', stream.stream.slug, message.value);
+    if (message.hasOwnProperty('value')) {
+      console.log('hook emit', stream.hook, '>', stream.stream.slug, message.value);
     } else {
-      console.log('hook emit', stream.hook,  '>', stream.stream.slug);
+      console.log('hook emit', stream.hook, '>', stream.stream.slug);
     }
 
-    api.addMessage(stream.stream.id, message, function(){});
+    api.addMessage(stream.stream.id, message, function() {});
 
   };
 
-  var getHook = function(stream, done){
+  var getHook = function(stream, done) {
 
-    if(!done){
-      done = function(){};
+    if (!done) {
+      done = function() {};
     }
 
-    if(!stream.hasOwnProperty('opts')){
+    if (!stream.hasOwnProperty('opts')) {
       stream.opts = {};
     }
 
-    console.log('calling hook', stream.hook,  '>', stream.stream.slug);
-    hooks[stream.hook].get(stream.opts, function(err, message){
-      if(err){
-        console.log('hook get failed', stream.hook,  '>', stream.stream.slug, err);
+    console.log('calling hook', stream.hook, '>', stream.stream.slug);
+    hooks[stream.hook].get(stream.opts, function(err, message) {
+      if (err) {
+        console.log('hook get failed', stream.hook, '>', stream.stream.slug, err);
         return done();
       }
 
-      if(message.hasOwnProperty('value')){
-        console.log('hook get', stream.hook,  '>', stream.stream.slug, message.value);
+      if (message.hasOwnProperty('value')) {
+        console.log('hook get', stream.hook, '>', stream.stream.slug, message.value);
       } else {
-        console.log('hook get', stream.hook,  '>', stream.stream.slug);
+        console.log('hook get', stream.hook, '>', stream.stream.slug);
       }
 
-      api.addMessage(stream.stream.id, message, function(){
+      api.addMessage(stream.stream.id, message, function() {
         done();
       });
 
@@ -383,30 +494,30 @@ var virtualDevice = function(opts){
 
   // inject a message from the api to a stream on the device.
 
-  var putHook = function(stream, message, done){
+  var putHook = function(stream, message, done) {
 
-    if(!done){
-      done = function(){};
+    if (!done) {
+      done = function() {};
     }
 
-    if(!stream.hasOwnProperty('opts')){
+    if (!stream.hasOwnProperty('opts')) {
       stream.opts = {};
     }
 
-    if(!hooks[stream.hook].hasOwnProperty('put')){
+    if (!hooks[stream.hook].hasOwnProperty('put')) {
       return done(new Error('put hook not available'));
     }
 
-    if(message.hasOwnProperty('value')){
-      console.log('hook put', stream.hook,  '>', stream.stream.slug, message.value);
+    if (message.hasOwnProperty('value')) {
+      console.log('hook put', stream.hook, '>', stream.stream.slug, message.value);
     } else {
-      console.log('hook put', stream.hook,  '>', stream.stream.slug);
+      console.log('hook put', stream.hook, '>', stream.stream.slug);
     }
 
-    hooks[stream.hook].put(stream.opts, message, function(err, message){
+    hooks[stream.hook].put(stream.opts, message, function(err, message) {
 
-      if(err){
-        console.log('hook put failed', stream.hook,  '>', stream.stream.slug, err);
+      if (err) {
+        console.log('hook put failed', stream.hook, '>', stream.stream.slug, err);
         return done();
       }
 
@@ -417,20 +528,20 @@ var virtualDevice = function(opts){
 
   };
 
-  var startReporting = function(next){
+  var startReporting = function(next) {
 
-    _.each(opts.streams, function(stream){
+    _.each(opts.streams, function(stream) {
 
-      if(!stream.hasOwnProperty('hook')){
+      if (!stream.hasOwnProperty('hook')) {
         return;
       }
 
-      if(!stream.hasOwnProperty('interval')){
+      if (!stream.hasOwnProperty('interval')) {
         return;
       }
 
-      stream.caller = function(){
-        getHook(stream, function(){
+      stream.caller = function() {
+        getHook(stream, function() {
           setTimeout(stream.caller, stream.interval);
         })
       };
@@ -442,7 +553,7 @@ var virtualDevice = function(opts){
 
   };
 
-  var start = function(){
+  var start = function() {
     console.log('device api key:', opts.device_api_key);
     async.series([
       getDevice,
