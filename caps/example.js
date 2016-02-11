@@ -5,8 +5,8 @@ module.exports = {
   },
   "functions": [
     {
-      "stream": "status_led",
-      "title": "Status LED",
+      "stream": "switch_mode",
+      "title": "Switch Mode",
       "schema": "control",
       "panel": "zeroonetwo",
       "hook": "set_value"
@@ -16,7 +16,22 @@ module.exports = {
       "schema": "float",
       "panel": "chart",
       "hook": "random_value",
-      "interval": 5000
+      "interval": 10000
+    }, {
+      "stream": "status_led",
+      "title": "Status LED",
+      "schema": "boolean",
+      "panel": "toggle",
+      "hook": "set_value"
+    }, {
+      "stream": "key_press",
+      "title": "Key Press",
+      "schema": "boolean",
+      "panel": "toggle",
+      "hook": "key_toggle",
+      "opts": {
+        "key": ' '
+      }
     }
   ]
 }
