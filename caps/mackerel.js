@@ -15,7 +15,29 @@ module.exports = {
         url: 'http://mackerel.local',
         gpio: 9,
         dp: 1,
-        //lut: 'thermistor.csv'
+        lut: 'therm_celsius_lut.csv'
+      }
+    }, {
+      stream: 'button_1_gpio_0',
+      title: 'Read Button 1 GPIO 0',
+      schema: 'boolean',
+      panel: 'led',
+      hook: 'z_http_gpio_get',
+      interval: 1000,
+      opts: {
+        url: 'http://mackerel.local',
+        gpio: 0
+      }
+    }, {
+      stream: 'button_2_gpio 11',
+      title: 'Read Button 2 GPIO 11',
+      schema: 'boolean',
+      panel: 'led',
+      hook: 'z_http_gpio_get',
+      interval: 1000,
+      opts: {
+        url: 'http://mackerel.local',
+        gpio: 11
       }
     }, {
       stream: 'led_1',

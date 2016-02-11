@@ -15,7 +15,7 @@ module.exports = {
         url: 'http://mantis.local',
         gpio: 17,
         dp: 1,
-        //lut: 'thermistor.csv'
+        lut: 'therm_celsius_lut.csv'
       }
     }, {
       stream: 'button_1_gpio_22',
