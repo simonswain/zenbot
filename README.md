@@ -66,17 +66,70 @@ ws to cloud   < {"action":"stream:message","stream":"random_value","message":{"a
 ws from cloud > streams/random_value {"at":1455163473918,"value":40.93}
 ```
 
+## Caps File
+
+```javascript
+module.exports = {
+  "cloud": {
+    "rest": "https://device.zentri.com",
+    "ws": "wss://device.zentri.com"
+  },
+  "functions": [
+    {
+      // run periodically to emit messages. eg sensor
+      "stream": "random_value",
+      "title": "Random Value",
+      "schema": "float",
+      "panel": "chart",
+      "hook": "random_value",
+      "interval": 10000
+    }, {
+      // control from web gui. hook sets state of hardware
+      "stream": "switch_mode",
+      "title": "Switch Mode",
+      "schema": "control",
+      "panel": "zeroonetwo",
+      "hook": "set_value"
+    }, {
+      // toggle from web gui. hook sets state of hardware
+      "stream": "status_led",
+      "title": "Status LED",
+      "schema": "boolean",
+      "panel": "toggle",
+      "hook": "set_value"
+    }, {
+      // press spacebar in terminal or use web gui to toggle
+      "stream": "key_press",
+      "title": "Key Press",
+      "schema": "boolean",
+      "panel": "toggle",
+      "hook": "key_toggle",
+      "opts": {
+        "key": ' '
+      }
+    }
+  ]
+}
+```
 
 ## Streams
 
-Streams and panels are a free-form
+Streams, Schemas and Panels are a free-form
 
-They don't have to have a 1:1 relationship to the hardware on the device.
+They don't have to have a 1:1 relationship to the hardware on the
+device. Design the right thing for your application.
 
-You choose the panel based on the intended use of the stream, so on
+Schemas are simply an agreement about what kind of message to emit or
+consume. The message structure isn't enforced. Message handlers should
+deal with this safely.
+
+Messages are limited to 1kB. This is the maximum size of a stringified
+JSON representation of the message..
+
+You choose the panel based on the intended use of the stream, eg on
 the GUI, the led panel shows the state of the stream, so it will
-always act as a sink on the stream. You could use this to mirror the
-state of an indicator LED on the device or to represent the value of a
+always act as a message sink. You could use this to mirror the state
+of an indicator LED on the device or to represent the value of a
 register on the device (e.g. something that gets toggled on or off by
 a button push)
 
@@ -84,7 +137,7 @@ The button panel is dual use -- is displays current state, and allows
 you to set state. This is good for having a control surface both on
 the device and in the cloud. You can control via either end.
 
-Panels are matched up to the streams schemas they work with. They are
+Panels are matched up to the streams/schemas they work with. They are
 designed to represent and/or control based on the data type of the
 schema
 
@@ -92,10 +145,8 @@ There is also a default panel for each schema -- if no panel is
 provided, or an incompatible one, the default panel (the panel with
 the name the same as the schema) is used.
 
-These are the current schemas and panels. These are just some basic
-ones. I'll add more and refine these shortly.
-
-schemas:
+These are the the basic schemas and panels. More to come. Make your
+own and PR then if you like.:
 
 ### boolean
 
@@ -112,7 +163,7 @@ zeroonetwo panel has buttons for 0, 1 and 2.
 
 ### json
 
-Arbitrary JSON. Messages are limited to 1kB. GUI just displays message.
+Arbitrary JSON. GUI just displays message.
 
 ### command
 
