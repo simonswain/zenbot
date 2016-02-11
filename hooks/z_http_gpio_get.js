@@ -1,8 +1,12 @@
+"use strict";
+
 // wiconnect_http_gpio_get
 
 var request = require('request');
 
 var init = function(opts, done){
+
+  opts._lastValue = null;
 
   request({
     method: 'GET',
@@ -37,11 +41,17 @@ var get = function(opts, done){
     url: url
   }, function (err, res, body) {
 
-    console.log(body);
+    // console.log(body);
     // { id: 25, code: 0, flags: 0, response: 'Set OK\r\n' }
 
     var value = body.response;
     value = Number(value);
+
+    if(value === opts._lastValue){
+      return done();
+    }
+
+    opts._lastValue = value;
 
     var message = {
       at: new Date().getTime(),
