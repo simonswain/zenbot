@@ -3,7 +3,7 @@ var fs = require('fs');
 var get = function(opts, done){
 
   var s = fs.readFile(opts.file, 'utf8', function(err, res){
-    console.log(res);
+    //console.log(res);
     if(err){
       return done(err);
     }
