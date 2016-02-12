@@ -169,10 +169,14 @@ var getHook = (fn, done) => {
     done = () => {};
   }
 
-  console.log('calling hook', fn.hook,  '>', fn.stream);
+  //console.log('calling hook', fn.hook,  '>', fn.stream);
   hooks[fn.hook].get(fn.opts, (err, message) => {
     if(err){
       console.log('hook get failed', fn.hook,  '>', fn.stream, err);
+      return done();
+    }
+
+    if(!message || typeof message !== 'object'){
       return done();
     }
 
@@ -242,7 +246,7 @@ var onMessage = (msg) => {
 
     // is it a command we have to process here? this overrides getHook
     if(fn.schema === 'command' && fn.hasOwnProperty('execute')) {
-      var target = _.find(functions, {stream: stream.execute});
+      var target = _.find(functions, {stream: fn.execute});
       console.log('execute', fn.stream, '>', fn.execute);
       return getHook(target);
     }
@@ -252,12 +256,21 @@ var onMessage = (msg) => {
     return;
   }
 
-}
+};
 
 var connectDevice = (next) => {
   softDevice.rawMessageHandler = onMessage;
-  softDevice.connect(next);
-}
+  softDevice.connect(() => {
+    async.eachSeries(
+      functions,
+      (fn, cb) => {
+        if(!fn.norepeat){
+          return cb();
+        }
+        softDevice.noRepeat(fn.stream, cb);
+      }, next);
+  });
+};
 
 var startReporting = (next) => {
 
