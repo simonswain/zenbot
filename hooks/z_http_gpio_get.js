@@ -41,6 +41,15 @@ var get = function(opts, done){
     url: url
   }, function (err, res, body) {
 
+    if(err){
+      console.log(err, body);
+      return done();
+    }
+
+    if(!body){
+      return done();
+    }
+    
     // console.log(body);
     // { id: 25, code: 0, flags: 0, response: 'Set OK\r\n' }
 
