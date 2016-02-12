@@ -9,6 +9,7 @@ var hooks = require('./hooks');
 
 var softDevice;
 var device;
+var server;
 
 var config, token;
 
@@ -33,7 +34,34 @@ if(config.cloud){
   console.log('Cloud WS  ', config.cloud.ws);
 }
 
+  if (!config.server) {
+    config.server = {
+      host: '127.0.0.1',
+      port: 6002
+    };
+  }
+
+
 var functions = _.clone(config.functions);
+
+var createServer = (next) => {
+
+  server = require('./server')(config.server);
+
+  server.start(() => {
+    console.log(config.server.host + ':' + config.server.port);
+  });
+
+  process.on('SIGINT', () => {
+    console.log(config.nickname + ' webapp ' + config.env + ' ' + 'stopping...');
+    server.stop(() => {
+      console.log(config.nickname + ' webapp ' + config.env + ' ' + 'finished');
+    });
+  });
+
+
+}
+
 
 var createSoftDevice = (next) => {
   softDevice = Device.create({
@@ -258,6 +286,7 @@ var startReporting = (next) => {
 };
 
 async.series([
+//  createServer,
   createSoftDevice,
   getDevice,
   //setAvatarIfNone,

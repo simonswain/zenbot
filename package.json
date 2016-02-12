@@ -17,10 +17,14 @@
   },
   "dependencies": {
     "async": "^1.5.2",
+    "handlebars": "^4.0.5",
+    "hapi": "^13.0.0",
+    "hapi-less": "^0.2.0",
     "lodash": "^4.1.0",
     "moment": "^2.11.1",
     "request": "^2.69.0",
     "request-json": "^0.5.5",
+    "vision": "^4.0.1",
     "ws": "^1.0.1"
   }
 }
