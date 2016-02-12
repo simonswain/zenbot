@@ -4,7 +4,7 @@ var get = function(opts, done){
 
   var s = fs.readFile(opts.file, 'utf8', function(err, res){
     if(typeof res ==='string'){
-      console.log(res.trim());
+      //console.log(res.trim());
     }
     if(err){
       return done(err);
