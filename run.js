@@ -169,6 +169,8 @@ var getHook = (fn, done) => {
     done = () => {};
   }
 
+  fn.opts.device = softDevice;
+
   //console.log('calling hook', fn.hook,  '>', fn.stream);
   hooks[fn.hook].get(fn.opts, (err, message) => {
     if(err){
