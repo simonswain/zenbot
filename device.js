@@ -215,6 +215,23 @@ Device.prototype.addMessage = function(slug, message, done) {
 
 };
 
+Device.prototype.noRepeat = function(slug, done) {
+
+  if (!this.ws) {
+    return done();
+  }
+
+  let msg = {
+    action: 'stream:repeat:off',
+    stream: slug,
+  };
+
+  console.log('ws to cloud   <', JSON.stringify(msg));
+  this.ws.send(JSON.stringify(msg));
+  done();
+
+};
+
 Device.prototype.putFile = function(file, done) {
 
   if (file.path.substr(0, 1) === '/') {
@@ -374,8 +391,8 @@ var virtualDevice = function(opts) {
     async.eachSeries(opts.streams, function(x, cb) {
       var stream = x.stream;
       if (_.findWhere(device.streams, {
-          slug: stream.slug
-        })) {
+        slug: stream.slug
+      })) {
         console.log(' *', stream.schema, '/' + stream.slug, '"' + stream.title + '"');
         x.stream = _.findWhere(device.streams, {
           slug: stream.slug
