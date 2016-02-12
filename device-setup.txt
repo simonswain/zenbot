@@ -1,0 +1,12 @@
+scan
+
+set wlan.ssid xxx
+set wlan.passkey
+nre
+
+set mdns.name moray
+set md e 1
+set ht s e 1
+set wl o e 1
+save
+reboot
