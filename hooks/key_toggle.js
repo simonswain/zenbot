@@ -17,11 +17,12 @@ var init = function(opts, done) {
   }
 
   rl.input.on('keypress', function(ch, key) {
-
     if (ch === opts.key) {
+      state = !state;
+
       var message = {
         at: new Date().getTime(),
-        value: state ? 0 : 1
+        value: state ? 1 : 0
       };
       handler(message);
     }

@@ -63,8 +63,13 @@ var makeStreams = (next) => {
     if(!fn.hasOwnProperty('opts')){
       fn.opts = {};
     }
+
     if(_.find(device.streams, {slug: fn.stream})){
       console.log('*', fn.schema, '/' + fn.stream, '"' + fn.title + '"');
+      return cb();
+    }
+
+    if(!fn.stream) {
       return cb();
     }
 
@@ -77,7 +82,7 @@ var makeStreams = (next) => {
 
     softDevice.addStream(
       stream,
-      (err, res) => {
+      () => {
         console.log('+', fn.schema, '/' + fn.stream, '"' + fn.title + '"');
         cb();
       });
@@ -107,23 +112,36 @@ var initHook = (fn, done) => {
       (message) => {
         onHook(fn, message);
       });
-  };
+  }
 
   // initialize hook
   hooks[fn.hook].init(
     fn.opts,
-    (err, message) => {
+    (err) => {
       if(err){
         console.log('hook init failed', fn.hook, err);
         return done();
       }
-      console.log('hook init', fn.hook);
+      console.log('hook init', fn.hook, fn.stream || '');
       return done();
     });
-
 };
 
 var onHook = (fn, message) => {
+
+  if(fn.target) {
+    var target = _.find(config.functions, {
+      stream: fn.target
+    });
+
+    hooks[target.hook].put(target.opts, message, () => {
+      softDevice.addMessage(fn.target, message, () => {});
+    });
+  }
+
+  if(!fn.stream) {
+    return;
+  }
 
   if(message.hasOwnProperty('value')){
     console.log('hook emit', fn.hook,  '>', fn.stream, message.value);
@@ -173,6 +191,7 @@ var putHook = (fn, message, done) => {
     done = () => {};
   }
 
+
   if(!hooks[fn.hook].hasOwnProperty('put')){
     return done(new Error('put hook not available'));
   }
@@ -210,7 +229,7 @@ var onMessage = (msg) => {
   if(msg.action === 'stream:message'){
     var fn = _.find(functions, {stream: msg.stream});
     if(!fn){
-      console.log('ws message: not found', JSON.stringify(msg));
+      console.log(' message: not found', JSON.stringify(msg));
       return;
     }
 

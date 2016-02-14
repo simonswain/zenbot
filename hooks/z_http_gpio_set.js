@@ -23,11 +23,10 @@ var init = function(opts, done){
     done();
 
   });
-  
+
 };
 
 var put = function(opts, message, done){
-
   request({
     method: 'GET',
     json: true,
@@ -48,9 +47,6 @@ var put = function(opts, message, done){
     done();
 
   });
-
-  done(null);
-  
 };
 
 module.exports = {
