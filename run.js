@@ -58,9 +58,7 @@ var createServer = (next) => {
       console.log(config.nickname + ' webapp ' + config.env + ' ' + 'finished');
     });
   });
-
-
-}
+};
 
 
 var createSoftDevice = (next) => {
@@ -142,6 +140,8 @@ var initHook = (fn, done) => {
       });
   }
 
+  fn.opts.device = softDevice;
+
   // initialize hook
   hooks[fn.hook].init(
     fn.opts,
@@ -221,6 +221,9 @@ var putHook = (fn, message, done) => {
     done = () => {};
   }
 
+  if(!hooks[fn.hook]){
+    return done();
+  }
 
   if(!hooks[fn.hook].hasOwnProperty('put')){
     return done(new Error('put hook not available'));
