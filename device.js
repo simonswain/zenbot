@@ -27,7 +27,9 @@ Device.prototype.connect = function(done) {
 
 Device.prototype.disconnect = function(done) {
   this.stopWatchdog();
-  this.ws.close();
+  if(this.ws){
+    this.ws.close();
+  }
   return done();
 };
 
@@ -117,8 +119,10 @@ Device.prototype.onSocketMessage = function(msg, flags) {
 };
 
 Device.prototype.quit = function(done) {
-  this.disconnect();
-  return done();
+  if(!done){
+    done = function(){};
+  }
+  this.disconnect(done);
 };
 
 // methods
@@ -338,6 +342,105 @@ Device.prototype.delFile = function(path, done) {
     done(err);
   });
 };
+
+
+Device.prototype.indexActions = function(done) {
+
+  var url = this.opts.rest + '/actions';
+
+  request({
+    method: 'GET',
+    json: true,
+    url: url,
+    headers: {
+      'Authorization': 'Bearer ' + this.opts.token
+    }
+  }, function(err, res, body) {
+    // if (res.statusCode !== 200) {
+    //   console.log(err, body);
+    //   return done(err);
+    // }
+    done(err, body);
+  });
+};
+
+Device.prototype.performAction = function(action, attrs, done) {
+
+  if(typeof attrs === 'function'){
+    done = attrs;
+    attrs = false;
+  }
+  
+  var url = this.opts.rest + '/actions/' + action;
+
+  var args = {
+    method: 'POST',
+    json: true,
+    url: url,
+    headers: {
+      'Authorization': 'Bearer ' + this.opts.token
+    }
+  };
+
+  if(attrs){
+    args.body = JSON.stringify(attrs);
+  }
+  
+  request(args, function(err, res, body) {
+    done(err, body);
+  });
+
+};
+
+Device.prototype.indexData = function(done) {
+
+  var url = this.opts.rest + '/data';
+
+  request({
+    method: 'GET',
+    json: true,
+    url: url,
+    headers: {
+      'Authorization': 'Bearer ' + this.opts.token
+    }
+  }, function(err, res, body) {
+    done(err, body);
+  });
+};
+
+Device.prototype.getData = function(key, done) {
+
+  var url = this.opts.rest + '/data/' + key;
+
+  request({
+    method: 'GET',
+    json: true,
+    url: url,
+    headers: {
+      'Authorization': 'Bearer ' + this.opts.token
+    }
+  }, function(err, res, body) {
+    done(err, body);
+  });
+};
+
+Device.prototype.setData = function(key, value, done) {
+
+  var url = this.opts.rest + '/data/' + key;
+
+  request({
+    method: 'POST',
+    json: true,
+    url: url,
+    body: value,
+    headers: {
+      'Authorization': 'Bearer ' + this.opts.token
+    }
+  }, function(err, res, body) {
+   done(err, body);
+  });
+};
+
 
 function create(opts) {
   var device = new Device(opts);
