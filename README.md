@@ -2,10 +2,12 @@
 
 This is a virtual device that can connect to [Zentri
 Cloud](http://cloud.zentri.com). It emulates how a hardware device
-would talk to the cloud. You can use it either as to test concepts for
-a hardware device, or as a client in it's own right.
+would talk to the cloud. You can use it either to test concepts for a
+hardware device, or as a client in it's own right.
 
-Zenbot has hooks that do things. Hooks listen for events or messages then perform their action. You can have hooks automatically run periocically too.
+Zenbot has hooks that do things. Hooks listen for events or messages
+then perform their action. You can have hooks automatically run
+periocically too.
 
 To extend Zenbot you can write your own hooks, doing anything you can
 with Node.
@@ -14,7 +16,10 @@ You define your Soft Device's capabilities with a json `caps` file.
 
 Each devices has somes streams.
 
-Hooks listen to or send messages to streams. A sensor would send a message to the cloud. A LED would receive a message from the cloud. A toggle button with a light could send and receive, showing the correct state at both ends.
+Hooks listen to or send messages to streams. A sensor would send a
+message to the cloud. A LED would receive a message from the cloud. A
+toggle button with a light could send and receive, showing the correct
+state at both ends.
 
 A typical Zenbot would be running this on a Raspberry PI that has
 connected hardware.
