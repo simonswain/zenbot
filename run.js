@@ -103,7 +103,8 @@ var makeStreams = (next) => {
       slug: fn.stream,
       title: fn.title,
       schema: fn.schema,
-      panel: fn.panel
+      panel: fn.panel,
+      options: fn.options
     };
 
     softDevice.addStream(

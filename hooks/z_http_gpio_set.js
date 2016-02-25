@@ -1,3 +1,5 @@
+"use strict";
+
 // wiconnect_http_gpio_set
 
 var request = require('request');

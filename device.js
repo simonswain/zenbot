@@ -172,6 +172,10 @@ Device.prototype.addStream = function(attrs, done) {
 
 Device.prototype.addMessage = function(slug, message, done) {
 
+  if(!done){
+    done = function(){};
+  }
+
   var url = this.opts.rest + '/streams/' + slug + '/messages';
 
   var success = true;
@@ -370,7 +374,7 @@ Device.prototype.performAction = function(action, attrs, done) {
     done = attrs;
     attrs = false;
   }
-  
+
   var url = this.opts.rest + '/actions/' + action;
 
   var args = {
@@ -385,7 +389,7 @@ Device.prototype.performAction = function(action, attrs, done) {
   if(attrs){
     args.body = JSON.stringify(attrs);
   }
-  
+
   request(args, function(err, res, body) {
     done(err, body);
   });
@@ -437,7 +441,7 @@ Device.prototype.setData = function(key, value, done) {
       'Authorization': 'Bearer ' + this.opts.token
     }
   }, function(err, res, body) {
-   done(err, body);
+    done(err, body);
   });
 };
 

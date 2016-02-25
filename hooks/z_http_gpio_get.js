@@ -1,7 +1,5 @@
 "use strict";
 
-// wiconnect_http_gpio_get
-
 var request = require('request');
 
 var init = function(opts, done){

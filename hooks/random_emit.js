@@ -1,3 +1,5 @@
+"use strict";
+
 var request = require('request');
 
 // this is an example hook you should use as a base to make your own
