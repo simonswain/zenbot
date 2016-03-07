@@ -1,7 +1,7 @@
 {
   "name": "zenbot",
   "description": "ZenBot - Node client for Zentri Cloud",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "homepage": "github.com/simonswain/zenbot",
   "author": {
     "name": "Simon Swain",

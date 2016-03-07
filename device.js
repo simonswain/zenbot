@@ -372,7 +372,7 @@ Device.prototype.performAction = function(action, attrs, done) {
 
   if(typeof attrs === 'function'){
     done = attrs;
-    attrs = false;
+    attrs = {};
   }
 
   var url = this.opts.rest + '/actions/' + action;
@@ -381,14 +381,11 @@ Device.prototype.performAction = function(action, attrs, done) {
     method: 'POST',
     json: true,
     url: url,
+    body: attrs,
     headers: {
       'Authorization': 'Bearer ' + this.opts.token
     }
   };
-
-  if(attrs){
-    args.body = JSON.stringify(attrs);
-  }
 
   request(args, function(err, res, body) {
     done(err, body);
