@@ -11,7 +11,7 @@ var get = function(opts, done){
   }
   
   if(opts.hasOwnProperty('base') && opts.hasOwnProperty('flux')){
-    value = Number(opts.base + (Math.random() * opts.flux)).toFixed(opts.dp)
+    value = Number(opts.base + (Math.random() * opts.flux).toFixed(opts.dp));
   } else {
     value = Number((Math.random() * 100).toFixed(opts.dp));
   }
