@@ -302,7 +302,7 @@ Device.prototype.getFile = function(path, done) {
 
   request({
     method: 'GET',
-    json: true,
+    encoding: null,
     url: url,
     headers: {
       'Authorization': 'Bearer ' + this.opts.token
@@ -312,10 +312,9 @@ Device.prototype.getFile = function(path, done) {
       console.log('file get error', err, body);
       return done(err);
     }
-
     var file = {
-      data: new Buffer(body, 'base64'),
-      mime: res.headers['binary-mime']
+      data: body,
+      mime: res.headers['content-type']
     };
 
     done(err, file);
