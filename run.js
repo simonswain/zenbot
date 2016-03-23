@@ -34,12 +34,12 @@ if(config.cloud){
   console.log('Cloud WS  ', config.cloud.ws);
 }
 
-  if (!config.server) {
-    config.server = {
-      host: '127.0.0.1',
-      port: 6002
-    };
-  }
+if (!config.server) {
+  config.server = {
+    host: '127.0.0.1',
+    port: 6002
+  };
+}
 
 
 var functions = _.clone(config.functions);
@@ -104,6 +104,7 @@ var makeStreams = (next) => {
       title: fn.title,
       schema: fn.schema,
       panel: fn.panel,
+      detail: fn.detail,
       options: fn.options
     };
 
@@ -324,7 +325,7 @@ var startReporting = (next) => {
 };
 
 async.series([
-//  createServer,
+  //  createServer,
   createSoftDevice,
   getDevice,
   //setAvatarIfNone,
