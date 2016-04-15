@@ -118,6 +118,11 @@ Device.prototype.onSocketMessage = function(msg, flags) {
   //console.log('ws unhandled:', JSON.stringify(msg));
 };
 
+// send a JSON message via WS
+Device.prototype.sendSocketMessage = function(msg) {
+  this.ws.send(JSON.stringify(msg));
+};
+
 Device.prototype.quit = function(done) {
   if(!done){
     done = function(){};
@@ -133,6 +138,52 @@ Device.prototype.get = function(done) {
     method: 'GET',
     json: true,
     url: this.opts.rest + '/',
+    headers: {
+      'Authorization': 'Bearer ' + this.opts.token
+    }
+  }, function(err, res, body) {
+    if (err) {
+      console.log(err.message);
+      process.exit(0);
+    }
+    if (res.statusCode !== 200) {
+      console.log(err, body);
+      return done(new Error('not found'));
+    }
+    done(err, body);
+  });
+
+};
+
+Device.prototype.getStreams = function(done) {
+
+  request({
+    method: 'GET',
+    json: true,
+    url: this.opts.rest + '/streams',
+    headers: {
+      'Authorization': 'Bearer ' + this.opts.token
+    }
+  }, function(err, res, body) {
+    if (err) {
+      console.log(err.message);
+      process.exit(0);
+    }
+    if (res.statusCode !== 200) {
+      console.log(err, body);
+      return done(new Error('not found'));
+    }
+    done(err, body);
+  });
+
+};
+
+Device.prototype.getStream = function(slug, done) {
+
+  request({
+    method: 'GET',
+    json: true,
+    url: this.opts.rest + '/streams/' + slug,
     headers: {
       'Authorization': 'Bearer ' + this.opts.token
     }

@@ -84,6 +84,16 @@ var getDevice = (next) => {
   });
 };
 
+var getStreams = (next) => {
+  softDevice.getStreams((err, res) => {
+    if(!res){
+      process.exit();
+    }
+    device.streams = res;
+    next();
+  });
+};
+
 var makeStreams = (next) => {
   async.eachSeries(functions, (fn, cb) => {
     if(!fn.hasOwnProperty('opts')){
@@ -328,7 +338,7 @@ async.series([
   //  createServer,
   createSoftDevice,
   getDevice,
-  //setAvatarIfNone,
+  getStreams,
   makeStreams,
   initHooks,
   connectDevice
